@@ -1,0 +1,29 @@
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key c  \major{  
+   
+   % Verse 1
+   < e g b c > 2
+   < g b c e > 8
+   < e gis b dis > 8
+   
+   % Verse 2
+   < d fis a cis > 4
+   < d fis a cis > 8
+   < c e g b > 2
+   < f a c > 8
+   < a d fis > 8
+   
+   % Verse 1
+   < e g b c > 2
+   < g b c e > 8
+   < e gis b dis > 8
+   
+   % Chorus
+   < d fis a > 4
+   }
+  }
+ }
+}

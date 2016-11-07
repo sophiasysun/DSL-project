@@ -1,0 +1,1 @@
+treble, c major, 3 4 Verse 1 {e maj7, e, 8c maj7, 8}Verse 2 {c maj, 4}

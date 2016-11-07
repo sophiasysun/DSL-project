@@ -1,0 +1,366 @@
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   
+   % Verse 1
+   < c e g b > e
+   < g b c e > null
+   < e gis b dis > null
+   
+   % Verse 2
+   < d fis a cis > null
+   < d fis a cis > null
+   < d fis a cis > null
+   < d fis a cis > null
+   < d fis a cis > null
+   
+   % Verse 1
+   < c e g b > e
+   < g b c e > null
+   < e gis b dis > null
+   
+   % Chorus
+   < d fis a cis > null
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   
+   % Verse 1
+   < c e g b > e
+   < g b c e > null
+   < e gis b dis > null
+   
+   % Verse 2
+   < d fis a cis > 4
+   < d fis a cis > 8
+   < d fis a cis > 8
+   < d fis a cis > 8
+   < d fis a cis > 8
+   
+   % Verse 1
+   < c e g b > e
+   < g b c e > null
+   < e gis b dis > null
+   
+   % Chorus
+   < d fis a cis > 4
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   
+   % Verse 1
+   < e g b c > 2
+   < g b c e > 8
+   < e gis b dis > 8
+   
+   % Verse 2
+   < d fis a cis > 4
+   < d fis a cis > 8
+   < d fis a cis > 8
+   < d fis a cis > 8
+   < d fis a cis > 8
+   
+   % Verse 1
+   < e g b c > 2
+   < g b c e > 8
+   < e gis b dis > 8
+   
+   % Chorus
+   < d fis a cis > 4
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
+\score {
+ \relative c{
+  \clef treble
+  \time 4/4{ 
+   \key g  \major{  
+   }
+  }
+ }
+}
