@@ -11,36 +11,45 @@ import java.util.HashMap;
 public class NoteProducer {
 
 	private static String clef;
+	private static String octave;
 	private static String songKey;
 	private static String songQuality;
 	private static int tS_top;
 	private static int tS_bot;
+	private static final int STEPS=12;
+	private int offset;
+	public Notes n = new Notes();
 
+	public QualityIntervals intervals  = new QualityIntervals ();
+
+	// will be assigned according to the quality of the chord 
+	// (diff quality => diff intervals between each note)
 	public ArrayList<Integer> intervalArray = new ArrayList<Integer> ();
 
 	public ArrayList<String> outputArray= new ArrayList<String> ();
 
-	public NoteProducer () {
-
-	}
 	// maybe instead of declaring it like this you have to set it??? 
-	public NoteProducer(String clef, String songKey, String songQuality, int tS_top, int tS_bot) {
+	public NoteProducer(String clef, String octave, String songKey, String songQuality, int tS_top, int tS_bot, int offset) {
 		this.clef = clef;
+		this.octave = octave;
 		this.songKey = songKey;
 		this.songQuality = songQuality;
 		this.tS_top = tS_top;
 		this.tS_bot = tS_bot;
+		this.offset = offset;
 	}
 
-	public ArrayList<String> sharps = new ArrayList<String> ();
-	public ArrayList<String> flats = new ArrayList<String> ();
-	public ArrayList<Integer> majorTriadIntervals = new ArrayList<Integer>();
-	public ArrayList<Integer> minorTriadIntervals = new ArrayList<Integer>();
-	public ArrayList<Integer> dom7Intervals = new ArrayList<Integer>();
-	public ArrayList<Integer>maj7Intervals = new ArrayList<Integer>();
-	public ArrayList<Integer> min7Intervals = new ArrayList<Integer>();
-	public ArrayList<Integer>dim7Intervals = new ArrayList<Integer>();
+	public ArrayList<String> sharps;
+	public ArrayList<String> flats;
+	public ArrayList<Integer> majorTriadIntervals;
+	public ArrayList<Integer> minorTriadIntervals;
+	public ArrayList<Integer> dom7Intervals;
+	public ArrayList<Integer>maj7Intervals;
+	public ArrayList<Integer> min7Intervals;
+	public ArrayList<Integer>dim7Intervals;
 	public char [] adjNotes = new char [7];
+	
+	String [] eis_maj = {"eis", "gisis", "bis"}; 
 
 	HashMap<String, String[]> dimMap = new HashMap<String, String[]>();
 
@@ -50,6 +59,7 @@ public class NoteProducer {
 	 */
 	public HashMap<String, String[]> createDim() {
 
+		// c sharp major is not taken care of
 		String [] c_dim = {"c","ees","ges"};
 		String [] cs_dim= {"cis","e","g"};
 		String [] df_dim= {"des","fes","aeses"};
@@ -67,25 +77,29 @@ public class NoteProducer {
 		String [] as_dim= {"ais","cis","e"};
 		String [] bf_dim= {"bes","des","fes"};
 		String [] b_dim= {"b","d","f"};
+		////
 
+		// changed from sharp to is
 		dimMap.put("c", c_dim);
-		dimMap.put("c sharp", cs_dim);
-		dimMap.put("d flat", df_dim);
+		dimMap.put("cis", cs_dim);
+		dimMap.put("des", df_dim);
 		dimMap.put("d", d_dim);
-		dimMap.put("d sharp", ds_dim);
-		dimMap.put("e flat", ef_dim);
+		dimMap.put("dis", ds_dim);
+		dimMap.put("ees", ef_dim);
 		dimMap.put("e", e_dim);
 		dimMap.put("f", f_dim);
-		dimMap.put("f sharp", fs_dim);
-		dimMap.put("g flat", gf_dim);
+		dimMap.put("fis", fs_dim);
+		dimMap.put("ges", gf_dim);
 		dimMap.put("g", g_dim);
-		dimMap.put("g sharp", gs_dim);
-		dimMap.put("a flat", af_dim);
+		dimMap.put("gis", gs_dim);
+		dimMap.put("aes", af_dim);
 		dimMap.put("a", a_dim);
-		dimMap.put("a sharp", as_dim);
-		dimMap.put("b flat", bf_dim);
+		dimMap.put("ais", as_dim);
+		dimMap.put("bes", bf_dim);
 		dimMap.put("b", b_dim);
-
+		
+		
+		
 		return dimMap;
 	}
 
@@ -95,35 +109,19 @@ public class NoteProducer {
 	 */
 	public void assignSharpsFlats() {
 
-		majorTriadIntervals.add(0);
-		majorTriadIntervals.add(4);
-		majorTriadIntervals.add(7);
+		majorTriadIntervals = intervals.getMaj();
+		minorTriadIntervals = intervals.getMaj();
 
-		minorTriadIntervals.add(0);
-		minorTriadIntervals.add(3);
-		minorTriadIntervals.add(7);
+		dom7Intervals = intervals.getDom7();
+		maj7Intervals = intervals.getMaj7();
+		min7Intervals = intervals.getMin7();
+		dim7Intervals = intervals.getDim7();
 
-		dom7Intervals.add(0);
-		dom7Intervals.add(4);
-		dom7Intervals.add(7);
-		dom7Intervals.add(10);
+		sharps = n.getSharps();
+		flats = n.getFlats();
+	}
 
-		maj7Intervals.add(0);
-		maj7Intervals.add(4);
-		maj7Intervals.add(7);
-		maj7Intervals.add(11);
-
-		min7Intervals.add(0);
-		min7Intervals.add(3);
-		min7Intervals.add(7);
-		min7Intervals.add(10);
-
-		dim7Intervals.add(0);
-		dim7Intervals.add(3);
-		dim7Intervals.add(6);
-		dim7Intervals.add(9);
-
-
+	public void setAdjNotes () {
 		adjNotes[0]='a';
 		adjNotes[1]='b';
 		adjNotes[2]='c';
@@ -131,34 +129,8 @@ public class NoteProducer {
 		adjNotes[4]='e';
 		adjNotes[5]='f';
 		adjNotes[6]='g';
-
-		sharps.add("a");
-		sharps.add("a sharp");
-		sharps.add("b");
-		sharps.add("c");
-		sharps.add("c sharp");
-		sharps.add("d");
-		sharps.add("d sharp");
-		sharps.add("e");
-		sharps.add("e sharp");
-		sharps.add("f sharp");
-		sharps.add("g");
-		sharps.add("g sharp");
-
-		flats.add("a");
-		flats.add("b flat");
-		flats.add("c flat");
-		flats.add("c");
-		flats.add("d flat");
-		flats.add("d");
-		flats.add("e flat");
-		flats.add("f flat");
-		flats.add("f");
-		flats.add("g flat");
-		flats.add("g");
-		flats.add("a flat");
 	}
-
+	
 	/**
 	 * If array contains String, return the index of that the String's appearance
 	 * @param array
@@ -170,7 +142,7 @@ public class NoteProducer {
 			return -1;
 		}
 		for (int i=0;i<array.size(); i++) {
-			if(array.get(i)==s)  {
+			if(array.get(i).equals(s))  {
 				return i;
 			}
 		}
@@ -194,7 +166,6 @@ public class NoteProducer {
 		}
 		return -1;
 	}
-
 
 	/**
 	 * Shuffles the notes in an array to the right for inversion 
@@ -220,8 +191,6 @@ public class NoteProducer {
 	 */
 	public boolean adjacentNoteNames() {
 
-		// get the name of each of the 3 notes 
-
 		char note1=outputArray.get(0).charAt(0);
 		char note2=outputArray.get(1).charAt(0);
 		char note3=outputArray.get(2).charAt(0);
@@ -241,22 +210,23 @@ public class NoteProducer {
 	 * @param quality
 	 */
 	public void intArray(String quality) {
-		if (quality == "major"){
+
+		if (quality.equals("major")){
 			intervalArray = majorTriadIntervals;
 		}
-		else if (quality == "minor"){
+		else if (quality.equals("minor")){
 			intervalArray = minorTriadIntervals;
 		}
-		else if (quality.trim() == "dom7"){
+		else if (quality.equals("dom7")){
 			intervalArray = dom7Intervals;
 		}
-		else if (quality == "maj7"){
+		else if (quality.equals("maj7")){
 			intervalArray = maj7Intervals;
 		}
-		else if (quality == "min7"){
+		else if (quality.equals("min7")){
 			intervalArray = min7Intervals;
 		}
-		else if (quality == "dim7"){
+		else if (quality.equals("dim7")){
 			intervalArray = dim7Intervals;
 		}
 	}
@@ -270,72 +240,107 @@ public class NoteProducer {
 	 * @param dur
 	 * @return
 	 */
-	public String singleChordString (String root, String quality, String inv) {
-
-		String noteString="";
+	public String singleChordString (String root, String quality, String inv, String notes) {
+		
+		
 		ArrayList<String> qualityArrayUsed= new ArrayList<String> ();
 
-		// default assign to sharps (all roots except for flat roots)
-		int rootIndex = returnIndex(sharps, root.trim());
-		qualityArrayUsed=sharps;
-
-		// if root not in sharps, go to flats
-		if (rootIndex==-1) {
-			rootIndex = returnIndex(flats, root.trim());
-			qualityArrayUsed=flats;
-		}
-
-		intArray(quality.trim());
-
-		// diminished chords 
-		if (quality=="diminished") {
-			for (int i=0; i<dimMap.get(root).length; i++ ){
-				outputArray.add(dimMap.get(root)[i]);
-			}
-		}
-
-		// default use sharps array; if adjacent, use flats array
-		else if (intervalArray!=null) {
-			for (int i=0;i<intervalArray.size();i++) {
-				outputArray.add(qualityArrayUsed.get((rootIndex+ intervalArray.get(i)) % qualityArrayUsed.size()));
-			}
-			if (adjacentNoteNames()) {
-				if (qualityArrayUsed==sharps) {
-					qualityArrayUsed = flats;
-				}
-				else {
-					qualityArrayUsed = sharps;
-				}
-				for (int i=0;i<intervalArray.size();i++) {
-					outputArray.set(i+1,qualityArrayUsed.get((rootIndex+ intervalArray.get(i)) % qualityArrayUsed.size()));
-				}
-			}
-		}
-
+		String noteString="";
 		// if inverse not specified, don't shuffle order 
 		int rootNoteIndex = 0;
+
+		if (notes!=null) {
+			String[] notesInCustomChord = notes.split(" ");
+			for (int i =0; i<notesInCustomChord.length; i++) {
+				outputArray.add(convertSharpFlat(notesInCustomChord[i]));
+			}
+		}
+
+		else {
+			
+			root = root.trim();
+			quality = quality.trim();
+			// default assign to sharps (all roots except for flat roots)
+			int rootIndex = returnIndex(sharps, root.trim());
+
+			qualityArrayUsed=sharps;
+
+			// if root not in sharps, go to flats
+			if (rootIndex==-1) {
+				rootIndex = returnIndex(flats, root.trim());
+				qualityArrayUsed=flats;
+				rootIndex = returnIndex(flats, root);
+			}
+
+			quality = quality.trim();
+			intArray(quality); 
+
+			// diminished chords 
+			if (quality.equals("diminished")) {
+				for (int i=0; i<dimMap.get(root).length; i++ ){
+					outputArray.add(dimMap.get(root)[i]);
+				}
+			}
+			
+			// why is this not working omg
+			else if (root=="eis" && quality=="major") {
+				for (int i=0; i<eis_maj.length; i++) {
+					outputArray.add(eis_maj[i]);
+				}
+			}
+			
+			// default use sharps array; if adjacent, use flats array
+			else if (intervalArray!=null) {
+				
+				for (int i=0;i<intervalArray.size();i++) {
+					outputArray.add(qualityArrayUsed.get((rootIndex+ intervalArray.get(i) + offset) % STEPS)); //handle offset 
+				}
+
+				if (adjacentNoteNames()) {
+					if (qualityArrayUsed.equals(sharps)) {
+						qualityArrayUsed = flats;
+					}
+					else {
+						qualityArrayUsed = sharps;
+					}
+					for (int i=0;i<intervalArray.size();i++) {
+						int intervalNextNote = rootIndex+ intervalArray.get(i);
+						outputArray.set((i+1), qualityArrayUsed.get(intervalNextNote % STEPS)); //f major, a, 4 isn't working correctly here, prob bc mod 
+					}
+				}
+			}
+		}
+
 		if (inv!=null) {
 
 			// if inversion specified by a root note name 
 			if (inv.matches("[A-Za-z]")) {
 				if (intervalArray!=null) {
+
+					int rootInTransposedKey=0;
+					if (qualityArrayUsed.contains(inv)) {
+						rootInTransposedKey = (qualityArrayUsed.indexOf(inv) + offset) % STEPS;
+						inv = qualityArrayUsed.get(rootInTransposedKey);
+					}
+
 					rootNoteIndex = returnIndex(outputArray, inv);
-				}
-				if (rootNoteIndex==-1){
-					throw new ArrayIndexOutOfBoundsException();
+					if (rootNoteIndex==-1){
+						//throw new ArrayIndexOutOfBoundsException();
+						System.out.println("This inversion is not possible!");
+					}
 				}
 			}
 			else {
 				// if inversion is represented by a number
 				// only let diminished do a 3rd inversion
-				if (inv=="1"||inv=="2"||inv=="3") {
+				if (inv.equals("1")||inv.equals("2")||inv.equals("3")) {
 					rootNoteIndex = Integer.parseInt(inv);
 				}
 			}
 		}
 
 		// shuffle the array and add each element to noteString 
-		String [] result = shuffleArrayIndex(outputArray, rootNoteIndex);
+		String [] result=shuffleArrayIndex(outputArray, rootNoteIndex);
 
 		// lily pond uses "is" for sharp and "es" for flat
 		for (int i=0;i<result.length;i++) {
@@ -350,6 +355,9 @@ public class NoteProducer {
 		return noteString;
 	}
 
+	
+
+	
 	/**
 	 * Log the message in a txt file
 	 * @author sophiasysun
@@ -363,16 +371,40 @@ public class NoteProducer {
 		}
 	}
 
+	
+
+	/**
+	 * WHY DOES THIS NOT WORK
+	 * @param note
+	 * @return
+	 */
+	public String convertSharpFlat(String note){
+		if (note.length()==1) {
+			System.out.println("length1");
+			return note;
+		}
+		else if (note.contains("#")) {
+			int sharp = note.indexOf("#");
+			note = note.substring(0, sharp);
+			note+="is";
+		}
+		else if (note.contains("b")) {
+			int flat = note.indexOf("b");
+			if (flat>0) {
+			note = note.substring(0, flat);
+			note+="es";
+			}
+		}
+		return note;
+	}
 	public static void main(String[] args) throws IOException {
 
 		Parser parser = new Parser();
-		NoteProducer np = parser.returnSongHeader();
+		NoteProducer np = parser.returnSongHeader(); // clef, key signature, and time signature of the song
 		ArrayList<Verse> song = parser.returnSong();
-		
-		// song isn't null, but why are the verses null... they're not null when printed in parser class though??
-		System.out.println("song size "+song.size());
 
 		np.assignSharpsFlats();
+		np.setAdjNotes();
 		np.createDim();
 
 		String chordOutput ="";
@@ -380,10 +412,10 @@ public class NoteProducer {
 
 		// for every verse
 		for (int v=0; v<song.size(); v++) {
-			
+
 			Verse verse = song.get(v);
 			String verseName = song.get(v).getName();
-		
+
 			for (int i=0; i<verse.getChords().size(); i++) {
 
 				if (i==0) {
@@ -392,19 +424,25 @@ public class NoteProducer {
 				else {
 					extraLine ="";
 				}
-				
+
 				String root = verse.getChords().get(i)[0];
+				System.out.println(root);
+				
+				
 				String quality = verse.getChords().get(i)[1];
 				String optional_inv = verse.getChords().get(i)[2];
 				String duration = verse.getChords().get(i)[3];
+				String notes = verse.getChords().get(i)[4];
+				chordOutput+=extraLine + "< "+ (np.singleChordString(root, quality, optional_inv, notes))+ "> "+ duration + "\n   ";
 				
-				chordOutput+=extraLine + "< "+ (np.singleChordString(root, quality, optional_inv))+ "> "+ duration + "\n   ";
+				
+				
 				np.outputArray.clear();
 			}
 		}
 
 		String output = "\\score {" + "\n " + 
-				"\\relative c{" +  "\n "  +  
+				"\\relative c" + octave + "{" +  "\n "  +  
 				" \\clef " + clef + "\n " + 
 				" \\time " + tS_top + "/" + tS_bot + 
 				"{ " + "\n " +
@@ -413,7 +451,8 @@ public class NoteProducer {
 				"{" + "  \n   "+ chordOutput +"}" + "\n" + 
 				"  }" +"\n" + " }" + "\n" + "}" + "\n";
 
-		Logger.log(output);
+		System.out.println(output);
+		//Logger.log(output);
 
 	}
 }
