@@ -44,4 +44,5 @@ public class WriterHelper extends PrintStream {
             super.write(b);
             second.write(b);
         }
+        
     }
