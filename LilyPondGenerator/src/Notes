@@ -1,0 +1,43 @@
+import java.util.ArrayList;
+
+public class Notes {
+	private ArrayList<String> sharps = new ArrayList<String> ();
+	private ArrayList<String> flats = new ArrayList<String> ();
+	
+	public Notes() {
+		sharps.add("a");
+		sharps.add("ais");
+		sharps.add("b");
+		sharps.add("c");
+		sharps.add("cis");
+		sharps.add("d");
+		sharps.add("dis");
+		sharps.add("e");
+		sharps.add("eis");
+		sharps.add("fis");
+		sharps.add("g");
+		sharps.add("gis");
+
+		flats.add("a");
+		flats.add("bes");
+		flats.add("ces");
+		flats.add("c");
+		flats.add("des");
+		flats.add("d");
+		flats.add("ees");
+		flats.add("fes");
+		flats.add("f");
+		flats.add("ges");
+		flats.add("g");
+		flats.add("aes");
+	
+	}
+	
+	 ArrayList<String> getSharps() {
+			return sharps;
+		}
+	 ArrayList<String> getFlats() {
+			return flats;
+		}
+
+}
