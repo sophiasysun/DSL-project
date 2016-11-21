@@ -1,0 +1,67 @@
+import java.util.ArrayList;
+
+public class QualityIntervals {
+	
+	public ArrayList<Integer> majorTriadIntervals = new ArrayList<Integer>();
+	public ArrayList<Integer> minorTriadIntervals = new ArrayList<Integer>();
+	public ArrayList<Integer> dom7Intervals = new ArrayList<Integer>();
+	public ArrayList<Integer>maj7Intervals = new ArrayList<Integer>();
+	public ArrayList<Integer> min7Intervals = new ArrayList<Integer>();
+	public ArrayList<Integer>dim7Intervals = new ArrayList<Integer>();
+	
+	public QualityIntervals () {
+		
+		majorTriadIntervals.add(0);
+		majorTriadIntervals.add(4);
+		majorTriadIntervals.add(7);
+
+		minorTriadIntervals.add(0);
+		minorTriadIntervals.add(3);
+		minorTriadIntervals.add(7);
+
+		dom7Intervals.add(0);
+		dom7Intervals.add(4);
+		dom7Intervals.add(7);
+		dom7Intervals.add(10);
+
+		maj7Intervals.add(0);
+		maj7Intervals.add(4);
+		maj7Intervals.add(7);
+		maj7Intervals.add(11);
+
+		min7Intervals.add(0);
+		min7Intervals.add(3);
+		min7Intervals.add(7);
+		min7Intervals.add(10);
+
+		dim7Intervals.add(0);
+		dim7Intervals.add(3);
+		dim7Intervals.add(6);
+		dim7Intervals.add(9);
+	}
+	
+	public ArrayList<Integer> getMaj () {
+		return majorTriadIntervals;
+	}
+	
+	public ArrayList<Integer> getMin () {
+		return minorTriadIntervals;
+	}
+	
+	public ArrayList<Integer> getDom7() {
+		return dom7Intervals;
+	}
+	
+	public ArrayList<Integer> getMaj7 () {
+		return maj7Intervals;
+	}
+	
+	public ArrayList<Integer> getMin7 () {
+		return min7Intervals;
+	}
+	
+	public ArrayList<Integer> getDim7 () {
+		return dim7Intervals;
+	}
+
+}
