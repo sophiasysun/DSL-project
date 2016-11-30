@@ -1,0 +1,22 @@
+
+public class StringManipulation {
+	
+	String convertSharpFlat(String note){
+		if (note.length()==1) {
+			return note;
+		}
+		else if (note.contains("#")) {
+			int sharp = note.indexOf("#");
+			note = note.substring(0, sharp);
+			note+="is";
+		}
+		else if (note.contains("b")) {
+			int flat = note.indexOf("b");
+			if (flat>0) {
+				note = note.substring(0, flat);
+				note+="es";
+			}
+		}
+		return note;
+	}
+}
