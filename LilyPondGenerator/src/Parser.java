@@ -7,27 +7,31 @@ import java.util.HashMap;
 
 public class Parser {
 	NoteProducer np;
-	public Notes n = new Notes();
-	ArrayList<String> sharps;
-	ArrayList<String> flats;
+	Notes n = new Notes();
+	ArrayList<String> sharps = n.getSharps();
+	ArrayList<String> flats = n.getFlats();
+	ArrayList<String> sharps_eb = n.getSharps_eb();
+	ArrayList<String> flats_cf = n.getFlats_cf();
 	
-	public ArrayList<Verse> song = new ArrayList<Verse> ();
+	StringManipulation str = new StringManipulation();
+
+	ArrayList<Verse> song = new ArrayList<Verse> ();
+	
 	ArrayList<String []> currSectionChords = new ArrayList<String []>();
+	HashMap<String, String> customNotes = new HashMap<String, String> ();
 	HashMap<String, String []> customChordMap = new HashMap<String, String []> ();
+	
 	int offset = 0;
-		
-	// ensure no white, blank space around duration: d maj7,  4 was a problem
+	boolean declaringNotesOnly = false;
+	
 	public Parser () throws FileNotFoundException, IOException {
-
-		sharps = n.getSharps();
-		flats = n.getFlats();
-
+		
 		ArrayList<String> txtFile = new ArrayList<String> ();
 		try (BufferedReader br = new BufferedReader(new FileReader("sample.txt"))) {
 			String line;
 			while ((line = br.readLine()) != null) {
 				// put all non-empty lines and non-comment lines into the String array of lines
-				if (!line.equals("") && (!line.contains("//"))) { // would be a problem if you had Verse 1  // comment /**ASKKK!*/
+				if (!line.equals("") && (!line.contains("//"))) { 
 					txtFile.add(line);
 				}
 			}
@@ -36,28 +40,42 @@ public class Parser {
 		/** parsing the first line **/
 		// first line describes key signature and time signature of the song 
 		String firstLine = txtFile.get(0); 
+		String secondLine = txtFile.get(1); 
 
-		// split up first line into each component of the input for np 
-		//treble, c major, 3 4, size 5
-		//treble, c major -> d major, 3 4, size 8
-		//0       1 2     3  4 5      6 7
+		/** PARSE TITLE IF THERE IS ONE **/
+		String title=null;
+		String composer = null;
+		String [] arr;
 
-		//bass''''', c major -> up 2, 3 4
-		//0          1 2     3  4  5  6 7 
+		if (firstLine.contains("by")) {
 
-		String [] arr = firstLine.split(" ");
-		String octave;
-		String song_clef;
-		
+			// title is the substring before the first space
+			int endOfTitle = firstLine.indexOf(" ");
+			title = firstLine.substring(0, endOfTitle);
+
+			// composer is substring after last space
+			int beforeComposer = firstLine.lastIndexOf(' ');
+			composer = firstLine.substring(beforeComposer+1);
+
+			arr = secondLine.split(" ");
+		}
+
+		else {
+			arr = firstLine.split(" ");
+		}
+
 		/** OCTAVE **/
 
+		String octave;
+		String song_clef;
+
 		// no octave specified
-		if ((arr[0].charAt(arr[0].length()-2)=='s' || arr[0].charAt(arr[0].length()-2)=='e')){
+		//if ((arr[0].charAt(arr[0].length()-2)=='s' || arr[0].charAt(arr[0].length()-2)=='e')){
+		if (arr[0].contains("bass") || arr[0].contains("treble")){
 			octave = "";
 			song_clef = arr[0].toLowerCase().substring(0, arr[0].length()-1);
-
 		}
-		
+
 		//octave specified
 		else {
 			int begOfOct=0; // after clef is specified, check the number of octaves specified
@@ -72,28 +90,20 @@ public class Parser {
 			song_clef = arr[0].toLowerCase().substring(0, begOfOct);
 		}
 
-		
 		/** KEY SIGNATURE **/
 		String song_root = "";
 		String song_quality="";
-		
+
 		// no transpose
 		if (arr.length==5) {
-			System.out.println("no transpose");
-			song_root = convertSharpFlat(arr[1].toLowerCase());
-			
-			
+			song_root = str.convertSharpFlat(str.convertSharpFlat(arr[1].toLowerCase()));
 			song_quality = arr[2].toLowerCase().substring(0, arr[2].length()-1);
 			offset = 0;
-			np = new NoteProducer(song_clef, octave, song_root, song_quality, Integer.parseInt(arr[3]), Integer.parseInt(arr[4]), offset);
+			np = new NoteProducer(song_clef, octave, song_root, song_quality, Integer.parseInt(arr[3]), Integer.parseInt(arr[4]), offset, title, composer);
 		}
 
 		// transpose
 		else if (arr.length==8) {
-
-			// if specifying transposition through number of half steps 
-			//bass''''', c major -> up 2, 3 4
-			//0          1 2     3  4  5  6 7 
 			if (arr[4].contains("up") || arr[4].contains("down")) {
 				if (arr[4].contains("up")) {
 					offset = Integer.valueOf(arr[5].substring(0, arr[5].indexOf(','))); 
@@ -102,8 +112,9 @@ public class Parser {
 				else if (arr[4].contains("down")) {
 					offset = -(Integer.valueOf(arr[5].substring(0, arr[5].indexOf(',')))); 
 				}
-
-				song_root = convertSharpFlat(arr[1].toLowerCase());
+				
+				// original root and quality
+				song_root = str.convertSharpFlat(str.convertSharpFlat(arr[1].toLowerCase()));
 				arr[2] = arr[2].toLowerCase();
 				song_quality = arr[2];
 			}
@@ -118,22 +129,29 @@ public class Parser {
 				if (sharps.contains(oldKey) && sharps.contains(newKey)) {
 					oldK = sharps.indexOf(oldKey);
 					newK = sharps.indexOf(newKey);
-					offset = newK - oldK;
 				}
 
 				else if (flats.contains(oldKey) && flats.contains(newKey)) {
 					oldK = flats.indexOf(oldKey);
 					newK = flats.indexOf(newKey);
-					offset = newK - oldK;
 				}
-
-				song_root = convertSharpFlat(arr[4].toLowerCase());
+				
+				else if (sharps_eb.contains(oldKey) && sharps_eb.contains(newKey)) {
+					oldK = sharps_eb.indexOf(oldKey);
+					newK = sharps_eb.indexOf(newKey);
+				}
+				
+				else if (flats_cf.contains(oldKey) && flats_cf.contains(newKey)) {
+					oldK = flats_cf.indexOf(oldKey);
+					newK = flats_cf.indexOf(newKey);
+				}
+				
+				offset = newK - oldK;
+				song_root = str.convertSharpFlat(str.convertSharpFlat(arr[4].toLowerCase()));
 				song_quality = arr[5].toLowerCase().substring(0, arr[5].length()-1); 
 			}
-
-			np = new NoteProducer(song_clef, octave, song_root, song_quality, Integer.parseInt(arr[6]), Integer.parseInt(arr[7]), offset);
+			np = new NoteProducer(song_clef, octave, song_root, song_quality, Integer.parseInt(arr[6]), Integer.parseInt(arr[7]), offset, title, composer);
 		}
-
 
 		/** parsing the remainder of the file **/
 		String currSectionName=""; // name of verse whose chords you are looking at 
@@ -141,6 +159,7 @@ public class Parser {
 
 		for (int i = 1; i<txtFile.size(); i++) {
 			String line = txtFile.get(i);
+			declaringNotesOnly = false; // reset
 
 			// if you're in a verse, you will either see a chord or a end bracket 
 			if (inVerse) {
@@ -157,7 +176,7 @@ public class Parser {
 				// CHORDS!
 				else {
 					String [] constructChord = new String [5];
-					
+
 					if(customChordMap.containsKey(line)) {
 						constructChord = customChordMap.get(line);
 					}
@@ -173,7 +192,7 @@ public class Parser {
 						constructChord[0]=parseRoot(chordArray[0]);
 						constructChord[1]=parseQuality(chordArray[1]);
 
-						// argument at index 2 is duration, not inversion 
+						// argument at index 2 is duration
 						if (!chordArray[2].contains(",")) {
 							constructChord[2]=null; // no inversion 
 							constructChord[3]=chordArray[2];
@@ -190,50 +209,72 @@ public class Parser {
 
 					// DECLARING NEW CUSTOM CHORD
 					else {
-						String customChordName = line.substring(0, line.indexOf("="));
-						customChordName=customChordName.trim();
-						
-						if(customChordMap.containsKey(customChordName)) {
-							
-							System.out.println("Already created this custom chord! "+customChordName);
+						String customName = line.substring(0, line.indexOf("="));
+						customName=customName.trim();
+
+						// if a custom chord with the same name already exists, don't create it
+						if(customChordMap.containsKey(customName)) {
+							System.out.println("Already created this custom chord! "+customName);
 						}
 
 						else {
-							String customChordInfo = line.substring(line.indexOf('(')+1,line.indexOf(')'));
-							String [] noteArray=customChordInfo.split(",");
-							String chordNotes = noteArray[0];
-							//String [] customChord = new String [5];
-							noteArray[1]= noteArray[1].trim();
+							// DECLARING NOTES AND DURATION
+							if (line.contains(",")) {
+								String lineWithCustomChord = line.substring(line.indexOf('(')+1,line.indexOf(')'));
+								String [] customChordInfo=lineWithCustomChord.split(",");
+								String chordNotes = customChordInfo[0].trim();
+								customChordInfo[1]= customChordInfo[1].trim();
 
-							// INVERSION SPECIFIED
-							if (noteArray.length==3) {
-								constructChord[0]=null;
-								constructChord[1]=null;
-								constructChord[2]=(noteArray[1]); // has inversion //parse inversion?
-								constructChord[3]=noteArray[2].substring(1, 2); // duration
-								constructChord[4]=chordNotes.trim();
+								
+								String firstElt =chordNotes;
+								
+								// if, within the parentheses, notes are referred to with the 
+								// name of a group of customNotes, get notes stored at that name
+								if (customNotes.containsKey(chordNotes)) {
+									chordNotes = customNotes.get(chordNotes);
+								}
+
+								// INVERSION SPECIFIED
+								if (customChordInfo.length==3) {
+									constructChord[0]=null;
+									constructChord[1]=null;
+									constructChord[2]=customChordInfo[1]; // has inversion //parse inversion?
+									constructChord[3]=customChordInfo[2].substring(1, 2); // duration
+									constructChord[4]=chordNotes;
+								}
+
+								// for custom chord, make it a normal chord but make the root and quality null 
+								// NO INVERSION SPECIFIED
+								else if (customChordInfo.length==2) {
+									constructChord[0]=null;
+									constructChord[1]=null;
+									constructChord[2]=null; // no inversion
+									constructChord[3]=customChordInfo[1]; // duration
+									constructChord[4]=chordNotes;
+								}
+
+								// add the constructed chord to the array of chords in this section 
+								customChordMap.put(customName, constructChord);
 							}
 
-							// for custom chord, make it a normal chord but make the root and quality null 
-							// NO INVERSION SPECIFIED
-							else {  
-								constructChord[0]=null;
-								constructChord[1]=null;
-								constructChord[2]=null; // no inversion
-								constructChord[3]=noteArray[1]; // duration
-								constructChord[4]=chordNotes;
+							// ONLY DECLARING NOTES nameOfCustomNoteGroup
+							else {
+								String notesOnly = line.substring(line.indexOf('(')+1,line.indexOf(')'));
+								notesOnly = notesOnly.trim();
+								customNotes.put(customName, notesOnly);
+								declaringNotesOnly=true;
 							}
-							// add the constructed chord to the array of chords in this section 
-							customChordMap.put(customChordName, constructChord);
-
 						}
 					}
-					// add the constructed chord to the array of chords in this section 
-					currSectionChords.add(constructChord);
+					if (!declaringNotesOnly){
+						// add the constructed chord to the array of chords in this section 
+						currSectionChords.add(constructChord);
+					}
 				}
+
 			}
 
-			// if you're in a verse you will never see {
+			// if you're in a verse you will never see '{'
 			else if (line.contains("{")) { // mark the index 
 				currSectionChords.removeAll(currSectionChords);
 				inVerse=true;
@@ -253,7 +294,6 @@ public class Parser {
 						song.add(calledVerse);
 					}
 					else {
-						// wait but we shouldn't even go in here.. WHY 
 						System.out.println("verse doesn't exist yet");
 					}
 				}
@@ -262,8 +302,6 @@ public class Parser {
 		returnSong();
 	}
 
-
-
 	/**
 	 * Parse chord root by converting to lower case and handling # and b 
 	 * @param s
@@ -271,7 +309,8 @@ public class Parser {
 	 */
 	public String parseRoot(String s) {
 		s = s.toLowerCase();
-		return convertSharpFlat(s);
+		s = str.convertSharpFlat(s);
+		return str.convertSharpFlat(s);
 	}
 
 	/**
@@ -291,35 +330,15 @@ public class Parser {
 	 */
 	public String parseInversion(String s) {
 		s = s.toLowerCase();
-		s = convertSharpFlat(s); // check if inversion has "#" or "b", if so, convert to "sharp" or "flat"
-		return s.substring(0, s.length()-1); // get rid of comma
+		s = str.convertSharpFlat(s); // if inversion has "#" or "b", if so, convert to "sharp" or "flat"
+		int commaLoc = s.indexOf(",");
+
+		if (commaLoc !=-1) {
+			return s.substring(0, commaLoc);
+		}
+		else return s;
 	}
-	
-	/**
-	 * WHY DOES THIS NOT WORK
-	 * @param note
-	 * @return
-	 */
-	public String convertSharpFlat(String note){
-		if (note.length()==1) {
-			System.out.println("length1");
-			return note;
-		}
-		else if (note.contains("#")) {
-			int sharp = note.indexOf("#");
-			note = note.substring(0, sharp);
-			note+="is";
-		}
-		else if (note.contains("b")) {
-			int flat = note.indexOf("b");
-			if (flat>0) {
-			note = note.substring(0, flat);
-			note+="es";
-			}
-		}
-		return note;
-	}
-	
+
 	/**
 	 * clef, key signature, and time signature of the song 
 	 * @return
@@ -356,7 +375,6 @@ public class Parser {
 		}
 		return chord_quality;
 	}
-
 	
 	/**
 	 * Get all the verses and their respective chords  
