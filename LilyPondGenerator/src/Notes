@@ -1,43 +1,222 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Notes {
 	private ArrayList<String> sharps = new ArrayList<String> ();
+	private ArrayList<String> sharps_eb = new ArrayList<String> ();
+
 	private ArrayList<String> flats = new ArrayList<String> ();
-	
+	private ArrayList<String> flats_cf = new ArrayList<String> ();
+
+	private HashMap<String, String[]> dimMap = new HashMap<String, String[]>();
+
+	public ArrayList<String> sharpExceptions = new ArrayList<String>();
+	public ArrayList<String> flatExceptions = new ArrayList<String>();
+
+	HashMap<String, ArrayList<String>> enharmonicChords = new HashMap<String, ArrayList<String>>();
+	ArrayList<String> eis_maj = new ArrayList<String>();
+	ArrayList<String> eis_min = new ArrayList<String>();
+	ArrayList<String> fes_maj = new ArrayList<String>();
+	ArrayList<String> fes_min = new ArrayList<String>();
+	ArrayList<String> bis_maj = new ArrayList<String>();
+	ArrayList<String> bis_min = new ArrayList<String>();
+	ArrayList<String> ces_maj = new ArrayList<String>();
+	ArrayList<String> ces_min = new ArrayList<String>();
+	ArrayList<String> dis_maj = new ArrayList<String>();
+	ArrayList<String> ais_maj = new ArrayList<String>();
+
+	// c sharp major is not taken care of
+	String [] c_dim = {"c","ees","ges"};
+	String [] cs_dim= {"cis","e","g"};
+	String [] df_dim= {"des","fes","aeses"};
+	String [] d_dim= {"d","f","aes"};
+	String [] ds_dim= {"dis","fis","a"};
+	String [] ef_dim= {"ees","ges","beses"};
+	String [] e_dim= {"e","g","bes"};
+	String [] f_dim= {"f","aes","ces"};
+	String [] fs_dim= {"fis","a","c"};
+	String [] gf_dim= {"ges","beses","deses"};
+	String [] g_dim= {"g","bes","des"};
+	String [] gs_dim= {"gis","b","d"};
+	String [] af_dim= {"aes","ces","eeses"};
+	String [] a_dim= {"a","c","ees"};
+	String [] as_dim= {"ais","cis","e"};
+	String [] bf_dim= {"bes","des","fes"};
+	String [] b_dim= {"b","d","f"};
+
 	public Notes() {
+	
 		sharps.add("a");
 		sharps.add("ais");
 		sharps.add("b");
-		sharps.add("c");
+		sharps.add("c"); 
 		sharps.add("cis");
 		sharps.add("d");
 		sharps.add("dis");
 		sharps.add("e");
-		sharps.add("eis");
+		sharps.add("f"); 
 		sharps.add("fis");
 		sharps.add("g");
 		sharps.add("gis");
 
+		sharps_eb.add("a");
+		sharps_eb.add("ais");
+		sharps_eb.add("b");
+		sharps_eb.add("bis");
+		sharps_eb.add("cis");
+		sharps_eb.add("d");
+		sharps_eb.add("dis");
+		sharps_eb.add("e");
+		sharps_eb.add("eis");
+		sharps_eb.add("fis");
+		sharps_eb.add("g");
+		sharps_eb.add("gis");
+
 		flats.add("a");
 		flats.add("bes");
-		flats.add("ces");
+		flats.add("b"); 
 		flats.add("c");
 		flats.add("des");
 		flats.add("d");
 		flats.add("ees");
-		flats.add("fes");
+		flats.add("e"); 
 		flats.add("f");
 		flats.add("ges");
 		flats.add("g");
 		flats.add("aes");
-	
-	}
-	
-	 ArrayList<String> getSharps() {
-			return sharps;
-		}
-	 ArrayList<String> getFlats() {
-			return flats;
-		}
 
+		flats_cf.add("a");
+		flats_cf.add("bes");
+		flats_cf.add("ces"); 
+		flats_cf.add("c");
+		flats_cf.add("des");
+		flats_cf.add("d");
+		flats_cf.add("ees");
+		flats_cf.add("fes"); 
+		flats_cf.add("f");
+		flats_cf.add("ges");
+		flats_cf.add("g");
+		flats_cf.add("aes");
+
+		eis_maj.add("eis");
+		eis_maj.add("gisis");
+		eis_maj.add("bis");
+
+		eis_min.add("eis");
+		eis_min.add("gis");
+		eis_min.add("bis");
+
+		fes_maj.add("fes");
+		fes_maj.add("aes");
+		fes_maj.add("ces");
+
+		fes_min.add("fes");
+		fes_min.add("aeses");
+		fes_min.add("ces");
+
+		bis_maj.add("bis");
+		bis_maj.add("disis");
+		bis_maj.add("fis");
+
+		bis_min.add("bis");
+		bis_min.add("dis");
+		bis_min.add("fis");
+
+		ces_maj.add("ces");
+		ces_maj.add("ees");
+		ces_maj.add("ges");
+
+		ces_min.add("ces");
+		ces_min.add("eeses");
+		ces_min.add("ges");
+
+		dis_maj.add("dis");
+		dis_maj.add("fisis");
+		dis_maj.add("ais");
+
+		ais_maj.add("ais");
+		ais_maj.add("cisis");
+		ais_maj.add("eis");
+
+		enharmonicChords.put("eis major", eis_maj);
+		enharmonicChords.put("eis minor", eis_min);
+		enharmonicChords.put("fes major", fes_maj);
+		enharmonicChords.put("fes minor", fes_min);
+		enharmonicChords.put("bis major", bis_maj);
+		enharmonicChords.put("bis minor", bis_min);
+		enharmonicChords.put("ces major", ces_maj);
+		enharmonicChords.put("ces minor", ces_min);
+		enharmonicChords.put("dis major", dis_maj);
+		enharmonicChords.put("ais major", ais_maj);
+		
+		//Generate notes for every possible diminished triad 
+		dimMap.put("c", c_dim);
+		dimMap.put("cis", cs_dim);
+		dimMap.put("des", df_dim);
+		dimMap.put("d", d_dim);
+		dimMap.put("dis", ds_dim);
+		dimMap.put("ees", ef_dim);
+		dimMap.put("e", e_dim);
+		dimMap.put("f", f_dim);
+		dimMap.put("fis", fs_dim);
+		dimMap.put("ges", gf_dim);
+		dimMap.put("g", g_dim);
+		dimMap.put("gis", gs_dim);
+		dimMap.put("aes", af_dim);
+		dimMap.put("a", a_dim);
+		dimMap.put("ais", as_dim);
+		dimMap.put("bes", bf_dim);
+		dimMap.put("b", b_dim);
+
+		//has e#
+		sharpExceptions.add("cis major");
+		sharpExceptions.add("cis dom7");
+		sharpExceptions.add("cis maj7");
+		sharpExceptions.add("ais aug");
+
+		// has b#
+		sharpExceptions.add("gis major");
+		sharpExceptions.add("gis dom7");
+		sharpExceptions.add("gis maj7");
+		sharpExceptions.add("e aug");
+
+		// has cb
+		flatExceptions.add("aes minor");
+
+		// has fb 
+		flatExceptions.add("des minor");
+		flatExceptions.add("bes minor");
+	}
+
+	ArrayList<String> getSharps() {
+		return sharps;
+	}
+
+	ArrayList<String> getFlats() {
+		return flats;
+	}
+
+	ArrayList<String> getSharps_eb() {
+		return sharps_eb;
+	}
+
+	ArrayList<String> getFlats_cf() {
+		return flats_cf;
+	}
+
+	HashMap<String, ArrayList<String>> getEnharmonicChords() {
+		return enharmonicChords;
+	}
+
+	HashMap<String, String[]> getDimChords() {
+		return dimMap;
+	}
+
+	ArrayList<String> getSharpExceptions() {
+		return sharpExceptions;
+	}
+
+	ArrayList<String> getFlatExceptions() {
+		return flatExceptions;
+	}
 }
