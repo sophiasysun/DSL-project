@@ -21,13 +21,13 @@ public class NoteProducer {
 	private int offset;
 	private String title;
 	private String composer;
-	
+
 	public boolean usedSharps;
 	public boolean usedFlats;
 	public boolean nonaccidentalRoot;
 	boolean sharpsTranspose = false;
 	boolean flatsTranspose = false;
-	
+
 	StringManipulation str = new StringManipulation();
 
 	public QualityIntervals intervals  = new QualityIntervals ();
@@ -57,10 +57,14 @@ public class NoteProducer {
 
 	public char [] adjNotes = new char [7];
 
+	ArrayList<String> qualityArrayUsed= new ArrayList<String> ();
+	int chordRootIndex = 0;
+
 	// maybe instead of declaring it like this you have to set it??? 
 	public NoteProducer(String clef, String octave, String songKey, String songQuality, int tS_top, int tS_bot, int offset, String title, String composer) {
 		this.clef = clef;
 		this.octave = octave;
+		this.songKey = songKey;
 		this.songQuality = songQuality;
 		this.tS_top = tS_top;
 		this.tS_bot = tS_bot;
@@ -68,11 +72,15 @@ public class NoteProducer {
 		this.title = title;
 		this.composer = composer;
 
-		if (songKey.contains("#")) {
+		
+		System.out.println(this.songKey);
+		
+		
+		if (this.songKey.contains("is")) {
 			sharpsTranspose = true;
 			flatsTranspose = false;
 		}
-		else if (songKey.indexOf("b")>0) {
+		else if (this.songKey.contains("es")) {
 			flatsTranspose = true;
 			sharpsTranspose = false;
 		}
@@ -100,6 +108,7 @@ public class NoteProducer {
 		}
 
 		else if (flatsTranspose) {
+			System.out.println("flats transpose!!");
 			indexOfSongKey =  flats.indexOf(songKey);
 			songKey = flats.get((indexOfSongKey+ offset + STEPS)%STEPS);
 			songKey = songKey.replace("es", "b");
@@ -234,6 +243,76 @@ public class NoteProducer {
 		}
 	}
 
+	
+	public String convertRootOfChord (String root) {
+		
+		if (sharpsTranspose) {
+			
+			System.out.println("using sharpsTranspose for chord root");
+			System.out.println("original root: " + root);
+			if (sharps.contains(root)) {
+				chordRootIndex = sharps.indexOf(root);
+				root = sharps.get((chordRootIndex+ offset + STEPS)%STEPS);
+				chordRootIndex =  flats.indexOf(root);
+				qualityArrayUsed = sharps;
+			}
+			else if (sharps_eb.contains(root)) {
+				chordRootIndex = sharps_eb.indexOf(root);
+				root =  sharps_eb.get((chordRootIndex+ offset + STEPS)%STEPS);
+				chordRootIndex =  flats.indexOf(root);
+				qualityArrayUsed = sharps_eb;
+			}
+			else if (flats.contains(root)) {
+				chordRootIndex =  flats.indexOf(root);
+				root =  flats.get((chordRootIndex+ offset + STEPS)%STEPS);
+				chordRootIndex =  flats.indexOf(root);
+				qualityArrayUsed = flats;
+			}
+
+			else if (flats_cf.contains(root)) {
+				chordRootIndex =  flats_cf.indexOf(root);
+				root =  flats_cf.get((chordRootIndex+ offset + STEPS)%STEPS);
+				chordRootIndex =  flats.indexOf(root);
+				qualityArrayUsed = flats_cf;
+			}
+		}
+
+		else if (flatsTranspose) {
+			System.out.println("using flatsTranspose for chord root");
+			System.out.println("original root: " + root);
+		
+			if (flats.contains(root)) {
+				chordRootIndex =  flats.indexOf(root);
+				root =  flats.get((chordRootIndex+ offset + STEPS)%STEPS);
+				chordRootIndex =  flats.indexOf(root);
+				qualityArrayUsed = flats;
+			}
+
+			else if (flats_cf.contains(root)) {
+				chordRootIndex =  flats_cf.indexOf(root);
+				root =  flats_cf.get((chordRootIndex+ offset + STEPS)%STEPS);
+				chordRootIndex =  flats.indexOf(root);
+				qualityArrayUsed = flats_cf;
+			}
+			
+			else if (sharps.contains(root)) {
+				chordRootIndex = sharps.indexOf(root);
+				root = sharps.get((chordRootIndex+ offset + STEPS)%STEPS);
+				chordRootIndex =  flats.indexOf(root);
+				qualityArrayUsed = sharps;
+			}
+			else if (sharps_eb.contains(root)) {
+				chordRootIndex = sharps_eb.indexOf(root);
+				root =  sharps_eb.get((chordRootIndex+ offset + STEPS)%STEPS);
+				chordRootIndex =  flats.indexOf(root);
+				qualityArrayUsed = sharps_eb;
+			}
+		}
+		System.out.println("new root: " + root);
+		return root;
+	}
+
+
 
 	/**
 	 * Produce the LilyPond syntax
@@ -245,8 +324,8 @@ public class NoteProducer {
 	 * @return
 	 */
 	public String singleChordString (String root, String quality, String inv, String notes) {
-
-		ArrayList<String> qualityArrayUsed= new ArrayList<String> ();
+	
+		
 		String noteString="";
 		// if inverse not specified, don't shuffle order 
 		int rootNoteIndex = 0;
@@ -263,38 +342,13 @@ public class NoteProducer {
 		else {
 			root = root.trim();
 			quality = quality.trim();
-
-			// default assign to sharps (all roots except for flat roots)
-			int chordKey = returnIndex(sharps, root);
-			qualityArrayUsed=sharps;
-
-			// if root not in sharps, go to flats
-			if (chordKey==-1) {
-				chordKey = returnIndex(flats, root.trim());
-				qualityArrayUsed = flats;
-				chordKey = returnIndex(flats, root);
-			}
-
 			intArray(quality); 
-			int chordRootIndex = 0;
-
-			if (sharpsTranspose) {
-				chordRootIndex = sharps.indexOf(root);
-				root =  sharps.get((chordRootIndex+ offset + STEPS)%STEPS);
-				chordKey = sharps.indexOf(root);
-			}
-
-			else if (flatsTranspose) {
-				chordRootIndex = flats.indexOf(root);
-				root =  flats.get((chordRootIndex+ offset + STEPS)%STEPS);
-				if (root.contains("es")) {
-					qualityArrayUsed = flats;
-				}
-				chordKey = flats.indexOf(root);
-			}
-
+			
+			// RESET ROOT 
+			root = convertRootOfChord (root);
 			String root_and_quality = root+" "+quality;
-		
+			System.out.println("root_and_quality " + root_and_quality);
+
 			// 1) handle with sharps_eb and flats_cf 
 			if (flatExceptions.contains(root_and_quality)) {
 				System.out.println("using flat exceptions");
@@ -322,7 +376,7 @@ public class NoteProducer {
 			// 4) all other chords
 			else {
 				for (int i=0;i<intervalArray.size();i++) {
-					outputArray.add(qualityArrayUsed.get((chordRootIndex+ intervalArray.get(i) + offset + STEPS) % STEPS)); //handle offset 
+					outputArray.add(qualityArrayUsed.get((chordRootIndex+ intervalArray.get(i) + STEPS) % STEPS)); //handle offset 
 				}
 
 				for (int oa=0; oa<outputArray.size(); oa++) {
@@ -330,16 +384,16 @@ public class NoteProducer {
 				}
 
 				if (adjacentNoteNames()) {
+					System.out.println("adj note names");
 					if (qualityArrayUsed.equals(sharps)) {
 						qualityArrayUsed = flats;
 					}
-					else {
+					else if (qualityArrayUsed.equals(flats)) {
+						System.out.println("convert to sharps");
 						qualityArrayUsed = sharps;
 					}
 					for (int i=0;i<intervalArray.size();i++) {
-						int intervalNextNote = chordKey+ intervalArray.get(i);
-
-						outputArray.set((i+1), qualityArrayUsed.get(intervalNextNote % STEPS)); //f major, a, 4 isn't working correctly here, prob bc mod 
+						outputArray.set(i, qualityArrayUsed.get((chordRootIndex+ intervalArray.get(i) + STEPS) % STEPS)); //handle offset 
 					}
 				}
 				intervalArrayAssigned = true;
