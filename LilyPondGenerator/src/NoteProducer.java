@@ -31,9 +31,7 @@ public class NoteProducer {
 	StringManipulation str = new StringManipulation();
 
 	public QualityIntervals intervals  = new QualityIntervals ();
-
 	public ArrayList<Integer> intervalArray = new ArrayList<Integer> ();
-	boolean intervalArrayAssigned = true;
 	public ArrayList<String> outputArray= new ArrayList<String> ();
 
 	// from Notes class
@@ -59,6 +57,11 @@ public class NoteProducer {
 
 	ArrayList<String> qualityArrayUsed= new ArrayList<String> ();
 	int chordRootIndex = 0;
+	int invIndex = 0;
+	
+
+	String updatedChordRoot;
+	String updatedChordInv;
 
 	// maybe instead of declaring it like this you have to set it??? 
 	public NoteProducer(String clef, String octave, String songKey, String songQuality, int tS_top, int tS_bot, int offset, String title, String composer) {
@@ -72,10 +75,6 @@ public class NoteProducer {
 		this.title = title;
 		this.composer = composer;
 
-		
-		System.out.println(this.songKey);
-		
-		
 		if (this.songKey.contains("is")) {
 			sharpsTranspose = true;
 			flatsTranspose = false;
@@ -108,7 +107,6 @@ public class NoteProducer {
 		}
 
 		else if (flatsTranspose) {
-			System.out.println("flats transpose!!");
 			indexOfSongKey =  flats.indexOf(songKey);
 			songKey = flats.get((indexOfSongKey+ offset + STEPS)%STEPS);
 			songKey = songKey.replace("es", "b");
@@ -152,6 +150,29 @@ public class NoteProducer {
 		return -1;
 	}
 
+
+	/**
+	 * Translate letter inversion into integer inversion
+	 * by finding the inversion relationship between the 
+	 * original chordRoot and original inversionNote
+	 * @param root
+	 * @param inv
+	 */
+	public void translateToNumericalInversion (String root, String inv) {
+		
+		ArrayList<String> tempArray = new ArrayList<String>();
+		int oldRootIndex = qualityArrayUsed.indexOf(root);
+		for (int i=0;i<intervalArray.size();i++) {
+			tempArray.add(qualityArrayUsed.get((oldRootIndex+ intervalArray.get(i) + STEPS) % STEPS));
+		}
+		
+		for (int i = 0;i<tempArray.size(); i++) {
+			if (inv.equals(tempArray.get(i))){
+				updatedChordInv = String.valueOf(i);
+			}
+		}
+	}
+
 	/**
 	 * Shuffles the notes in an array to the right for inversion 
 	 * @param array
@@ -160,8 +181,7 @@ public class NoteProducer {
 	 */
 	public String [] shuffleArrayIndex(ArrayList<String> array, int noteNumber) {
 		String[] shuffled = new String[array.size()];
-
-		for (int i = 0;i <array.size(); i++) {
+		for (int i = 0; i <array.size(); i++) {
 			shuffled[i] = array.get((i+noteNumber) % array.size());
 		}
 		String [] result = shuffled;
@@ -243,75 +263,108 @@ public class NoteProducer {
 		}
 	}
 
-	
-	public String convertRootOfChord (String root) {
-		
-		if (sharpsTranspose) {
-			
-			System.out.println("using sharpsTranspose for chord root");
-			System.out.println("original root: " + root);
-			if (sharps.contains(root)) {
-				chordRootIndex = sharps.indexOf(root);
-				root = sharps.get((chordRootIndex+ offset + STEPS)%STEPS);
-				chordRootIndex =  flats.indexOf(root);
-				qualityArrayUsed = sharps;
-			}
-			else if (sharps_eb.contains(root)) {
-				chordRootIndex = sharps_eb.indexOf(root);
-				root =  sharps_eb.get((chordRootIndex+ offset + STEPS)%STEPS);
-				chordRootIndex =  flats.indexOf(root);
-				qualityArrayUsed = sharps_eb;
-			}
-			else if (flats.contains(root)) {
-				chordRootIndex =  flats.indexOf(root);
-				root =  flats.get((chordRootIndex+ offset + STEPS)%STEPS);
-				chordRootIndex =  flats.indexOf(root);
-				qualityArrayUsed = flats;
+	public void convertRootAndInversionOfChord (String root, String quality, String inv) {
+
+		// if inversion is specified using a letter, make sure both chordRoot and invNote
+		// can be found in the qualityArray
+		// then find the new root given the offset
+		// and use "translateToNumericalInversion" to find the numerical inversion 
+		if (inv.matches("[A-Za-z]+")) {
+
+			if (sharpsTranspose) {
+				if (sharps.contains(root) && sharps.contains(inv)) {
+					qualityArrayUsed = sharps;
+				}
+
+				else if (sharps_eb.contains(root) && sharps_eb.contains(inv) ) {
+					qualityArrayUsed = sharps_eb;
+				}
+
+				else if (flats.contains(root) && flats.contains(inv)) {
+					qualityArrayUsed = flats;
+				}
+
+				else if (flats_cf.contains(root) && flats_cf.contains(inv)) { 
+					qualityArrayUsed = flats_cf;
+				}
 			}
 
-			else if (flats_cf.contains(root)) {
-				chordRootIndex =  flats_cf.indexOf(root);
-				root =  flats_cf.get((chordRootIndex+ offset + STEPS)%STEPS);
-				chordRootIndex =  flats.indexOf(root);
-				qualityArrayUsed = flats_cf;
+			else if (flatsTranspose) {
+				if (flats.contains(root) && flats.contains(inv)) {
+					qualityArrayUsed = flats; 
+				}
+				else if (flats_cf.contains(root) && flats_cf.contains(inv)) { 
+					qualityArrayUsed = flats_cf; 
+				}
+				else if (sharps.contains(root) && sharps.contains(inv)) {
+					qualityArrayUsed = sharps;
+				}
+				else if (sharps_eb.contains(root) && sharps_eb.contains(inv)) {
+					qualityArrayUsed = sharps_eb;
+				}
+			}
+
+			chordRootIndex = qualityArrayUsed.indexOf(root);
+			updatedChordRoot = qualityArrayUsed.get((chordRootIndex + offset + STEPS)%STEPS);
+			chordRootIndex = qualityArrayUsed.indexOf(updatedChordRoot);
+			
+			translateToNumericalInversion(root, inv);
+			
+			if (updatedChordRoot.equals("b") || updatedChordRoot.equals("e")) {
+				qualityArrayUsed = sharps;
+			}
+			else if (updatedChordRoot.equals("c") || updatedChordRoot.equals("f")) {
+				qualityArrayUsed = flats;
 			}
 		}
 
-		else if (flatsTranspose) {
-			System.out.println("using flatsTranspose for chord root");
-			System.out.println("original root: " + root);
-		
-			if (flats.contains(root)) {
-				chordRootIndex =  flats.indexOf(root);
-				root =  flats.get((chordRootIndex+ offset + STEPS)%STEPS);
-				chordRootIndex =  flats.indexOf(root);
-				qualityArrayUsed = flats;
+
+		// if inversion is specified using a number 
+		else {
+			if (sharpsTranspose) {
+				if (sharps.contains(root)) {
+					qualityArrayUsed = sharps;
+				}
+
+				else if (sharps_eb.contains(root)) {
+					qualityArrayUsed = sharps_eb;
+				}
+
+				else if (flats.contains(root)) {
+					qualityArrayUsed = flats;
+				}
+
+				else if (flats_cf.contains(root)) { 
+					qualityArrayUsed = flats_cf;
+				}
 			}
 
-			else if (flats_cf.contains(root)) {
-				chordRootIndex =  flats_cf.indexOf(root);
-				root =  flats_cf.get((chordRootIndex+ offset + STEPS)%STEPS);
-				chordRootIndex =  flats.indexOf(root);
-				qualityArrayUsed = flats_cf;
+			else if (flatsTranspose) {
+				if (flats.contains(root)) {
+					qualityArrayUsed = flats; 
+				}
+				else if (flats_cf.contains(root)) { 
+					qualityArrayUsed = flats_cf; 
+				}
+				else if (sharps.contains(root)) {
+					qualityArrayUsed = sharps;
+				}
+				else if (sharps_eb.contains(root)) {
+					qualityArrayUsed = sharps_eb;
+				}
 			}
-			
-			else if (sharps.contains(root)) {
-				chordRootIndex = sharps.indexOf(root);
-				root = sharps.get((chordRootIndex+ offset + STEPS)%STEPS);
-				chordRootIndex =  flats.indexOf(root);
+			chordRootIndex = qualityArrayUsed.indexOf(root);
+			updatedChordRoot = qualityArrayUsed.get((chordRootIndex + offset + STEPS)%STEPS);
+			chordRootIndex = qualityArrayUsed.indexOf(updatedChordRoot);
+
+			if (updatedChordRoot.equals("b") || updatedChordRoot.equals("e")) {
 				qualityArrayUsed = sharps;
 			}
-			else if (sharps_eb.contains(root)) {
-				chordRootIndex = sharps_eb.indexOf(root);
-				root =  sharps_eb.get((chordRootIndex+ offset + STEPS)%STEPS);
-				chordRootIndex =  flats.indexOf(root);
-				qualityArrayUsed = sharps_eb;
+			else if (updatedChordRoot.equals("c") || updatedChordRoot.equals("f")) {
+				qualityArrayUsed = flats;
 			}
 		}
-		System.out.println("new root: " + root);
-		return root;
 	}
-
 
 
 	/**
@@ -324,17 +377,34 @@ public class NoteProducer {
 	 * @return
 	 */
 	public String singleChordString (String root, String quality, String inv, String notes) {
-	
 		
+		// reset
+		updatedChordRoot = null;
+		updatedChordInv = null;
+
 		String noteString="";
 		// if inverse not specified, don't shuffle order 
 		int rootNoteIndex = 0;
 
+		if (inv==null) {
+			inv = "0";
+			updatedChordInv = "0";
+		}
+		
 		// if parsing custom chord 
 		if (notes!=null && root == null && quality == null) {
+
+			// populate outputArray with customNotes
 			String[] notesInCustomChord = notes.split(" ");
 			for (int i =0; i<notesInCustomChord.length; i++) {
 				outputArray.add(str.convertSharpFlat(notesInCustomChord[i]));
+			}
+			
+			// get numerical inversion given bottom note of chord 
+			for (int i =0; i<notesInCustomChord.length; i++) {
+				if (outputArray.get(i).equals(inv)) {
+					updatedChordInv = Integer.toBinaryString(i);
+				}
 			}
 		}
 
@@ -343,99 +413,57 @@ public class NoteProducer {
 			root = root.trim();
 			quality = quality.trim();
 			intArray(quality); 
-			
+
+
 			// RESET ROOT 
-			root = convertRootOfChord (root);
-			String root_and_quality = root+" "+quality;
-			System.out.println("root_and_quality " + root_and_quality);
+			convertRootAndInversionOfChord(root, quality, inv);
 
-			// 1) handle with sharps_eb and flats_cf 
-			if (flatExceptions.contains(root_and_quality)) {
-				System.out.println("using flat exceptions");
-				qualityArrayUsed = flats_cf;
-			}
-			else if (sharpExceptions.contains(root_and_quality)) {
-				System.out.println("using sharp exceptions");
-				qualityArrayUsed = sharps_eb; 
-			}
-
+			String root_and_quality = updatedChordRoot+" "+quality;
+			
 			// 2) handle diminished chords 
 			if (quality.equals("diminished")) {
-				for (int i=0; i<dimMap.get(root).length; i++ ){
-					outputArray.add(dimMap.get(root)[i]);
+				for (int i=0; i<dimMap.get(updatedChordRoot).length; i++ ){
+					outputArray.add(dimMap.get(updatedChordRoot)[i]);
 				}
 			}
 
 			// 3) handle ## or bb
 			else if (enharmonicChords.containsKey(root_and_quality)){
 				specialChords(root_and_quality);
-				intervalArrayAssigned = false;
 				intervalArray = null; 
 			}
 
 			// 4) all other chords
 			else {
+
 				for (int i=0;i<intervalArray.size();i++) {
 					outputArray.add(qualityArrayUsed.get((chordRootIndex+ intervalArray.get(i) + STEPS) % STEPS)); //handle offset 
 				}
 
-				for (int oa=0; oa<outputArray.size(); oa++) {
-					System.out.println(outputArray.get(oa));
-				}
-
 				if (adjacentNoteNames()) {
-					System.out.println("adj note names");
+
 					if (qualityArrayUsed.equals(sharps)) {
 						qualityArrayUsed = flats;
 					}
 					else if (qualityArrayUsed.equals(flats)) {
-						System.out.println("convert to sharps");
 						qualityArrayUsed = sharps;
 					}
 					for (int i=0;i<intervalArray.size();i++) {
 						outputArray.set(i, qualityArrayUsed.get((chordRootIndex+ intervalArray.get(i) + STEPS) % STEPS)); //handle offset 
+
 					}
 				}
-				intervalArrayAssigned = true;
 			}
 		}
 
-		// handle inversion if specified
-		if (inv!=null) {
 
-			// if inversion specified by a root note name 
-			if (inv.matches("[A-Za-z]+")) {
-
-				// special chord
-				if (!intervalArrayAssigned) {
-					rootNoteIndex = returnIndex(outputArray, inv);
-				}
-
-				// not special chord 
-				else {
-					int rootInTransposedKey=0;
-					if (qualityArrayUsed.contains(inv)) {
-						rootInTransposedKey = (qualityArrayUsed.indexOf(inv) + offset + STEPS) % STEPS;
-						inv = qualityArrayUsed.get(rootInTransposedKey);
-					}
-					rootNoteIndex = returnIndex(outputArray, inv);
-					if (rootNoteIndex==-1){
-						System.out.println("This inversion is not possible!");
-					}
-				}
-			}
-
-			// if inversion is represented by a number
-			else {
-				int inversion = Integer.valueOf(inv);
-				//if (inv.equals("1")||inv.equals("2")||inv.equals("3")) {
-				if (inversion<outputArray.size()) {
-					rootNoteIndex = Integer.parseInt(inv);
-				}
-				else {
-					System.out.println("This inversion int is not possible");
-				}
-			}
+		// HANDLE INVERSION (note name inversions already converted to integers) 
+		int inversion = Integer.valueOf(updatedChordInv);
+		if (inversion<outputArray.size()) {
+			rootNoteIndex = Integer.parseInt(updatedChordInv);
+		}
+		else {
+			System.out.println("This inversion int is not possible");
 		}
 
 		// shuffle the array and add each element to noteString 
@@ -446,6 +474,7 @@ public class NoteProducer {
 		}
 		return noteString;
 	}
+
 
 	/**
 	 * Log the message in a txt file
@@ -460,11 +489,23 @@ public class NoteProducer {
 		}
 	}
 
+	/**
+	 * create outputArray with notes given root and quality 
+	 * 	eis_maj
+		eis_min
+		fes_maj
+		fes_min
+		bis_maj
+		bis_min
+		ces_maj
+		ces_min
+		dis_maj
+		ais_maj
+	 * @param root_and_quality
+	 */
 	public void specialChords (String root_and_quality) {
 		ArrayList<String> enharmChord = new ArrayList<String>();
-
 		enharmChord = enharmonicChords.get(root_and_quality);
-
 		for (int i=0; i<enharmChord.size(); i++) {
 			outputArray.add(enharmChord.get(i));
 		}
