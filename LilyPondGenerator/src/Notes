@@ -24,7 +24,16 @@ public class Notes {
 	ArrayList<String> ces_min = new ArrayList<String>();
 	ArrayList<String> dis_maj = new ArrayList<String>();
 	ArrayList<String> ais_maj = new ArrayList<String>();
-
+	ArrayList<String> cis_maj = new ArrayList<String>();
+	ArrayList<String> cis_dom7 = new ArrayList<String>();
+	ArrayList<String> gis_maj = new ArrayList<String>();
+	
+	ArrayList<String> eis_dom7 = new ArrayList<String>();
+	ArrayList<String> fes_dom7 = new ArrayList<String>();
+	ArrayList<String> dis_dom7 = new ArrayList<String>();
+	ArrayList<String> gis_dom7 = new ArrayList<String>();
+	ArrayList<String> ais_dom7 = new ArrayList<String>();
+	
 	// c sharp major is not taken care of
 	String [] c_dim = {"c","ees","ges"};
 	String [] cs_dim= {"cis","e","g"};
@@ -45,16 +54,16 @@ public class Notes {
 	String [] b_dim= {"b","d","f"};
 
 	public Notes() {
-	
+
 		sharps.add("a");
 		sharps.add("ais");
 		sharps.add("b");
-		sharps.add("c"); 
+		sharps.add("c"); //
 		sharps.add("cis");
 		sharps.add("d");
 		sharps.add("dis");
 		sharps.add("e");
-		sharps.add("f"); 
+		sharps.add("f"); //
 		sharps.add("fis");
 		sharps.add("g");
 		sharps.add("gis");
@@ -62,24 +71,24 @@ public class Notes {
 		sharps_eb.add("a");
 		sharps_eb.add("ais");
 		sharps_eb.add("b");
-		sharps_eb.add("bis");
+		sharps_eb.add("bis"); //
 		sharps_eb.add("cis");
 		sharps_eb.add("d");
 		sharps_eb.add("dis");
 		sharps_eb.add("e");
-		sharps_eb.add("eis");
+		sharps_eb.add("eis"); //
 		sharps_eb.add("fis");
 		sharps_eb.add("g");
 		sharps_eb.add("gis");
 
 		flats.add("a");
 		flats.add("bes");
-		flats.add("b"); 
+		flats.add("b"); //
 		flats.add("c");
 		flats.add("des");
 		flats.add("d");
 		flats.add("ees");
-		flats.add("e"); 
+		flats.add("e"); //
 		flats.add("f");
 		flats.add("ges");
 		flats.add("g");
@@ -87,12 +96,12 @@ public class Notes {
 
 		flats_cf.add("a");
 		flats_cf.add("bes");
-		flats_cf.add("ces"); 
+		flats_cf.add("ces"); //
 		flats_cf.add("c");
 		flats_cf.add("des");
 		flats_cf.add("d");
 		flats_cf.add("ees");
-		flats_cf.add("fes"); 
+		flats_cf.add("fes"); //
 		flats_cf.add("f");
 		flats_cf.add("ges");
 		flats_cf.add("g");
@@ -101,14 +110,24 @@ public class Notes {
 		eis_maj.add("eis");
 		eis_maj.add("gisis");
 		eis_maj.add("bis");
+		
+		eis_dom7.add("eis");
+		eis_dom7.add("gisis");
+		eis_dom7.add("bis");
+		eis_dom7.add("dis");
 
 		eis_min.add("eis");
 		eis_min.add("gis");
 		eis_min.add("bis");
-
+		
 		fes_maj.add("fes");
 		fes_maj.add("aes");
 		fes_maj.add("ces");
+		
+		fes_dom7.add("fes");
+		fes_dom7.add("aes");
+		fes_dom7.add("ces");
+		fes_dom7.add("eeses");
 
 		fes_min.add("fes");
 		fes_min.add("aeses");
@@ -133,12 +152,36 @@ public class Notes {
 		dis_maj.add("dis");
 		dis_maj.add("fisis");
 		dis_maj.add("ais");
+		
+		dis_dom7.add("dis");
+		dis_dom7.add("fisis");
+		dis_dom7.add("ais");
+		dis_dom7.add("cis");
 
 		ais_maj.add("ais");
 		ais_maj.add("cisis");
 		ais_maj.add("eis");
+		
+		ais_dom7.add("ais");
+		ais_dom7.add("cisis");
+		ais_dom7.add("eis");
+		ais_dom7.add("gis");
+		
+		cis_maj.add("cis");
+		cis_maj.add("eisis");
+		cis_maj.add("gis");
+		
+		cis_dom7.add("cis");
+		cis_dom7.add("eisis");
+		cis_dom7.add("gis");
+		cis_dom7.add("b");
+		
+		gis_maj.add("gis");
+		gis_maj.add("bisis");
+		gis_maj.add("dis");
 
 		enharmonicChords.put("eis major", eis_maj);
+		
 		enharmonicChords.put("eis minor", eis_min);
 		enharmonicChords.put("fes major", fes_maj);
 		enharmonicChords.put("fes minor", fes_min);
@@ -148,8 +191,21 @@ public class Notes {
 		enharmonicChords.put("ces minor", ces_min);
 		enharmonicChords.put("dis major", dis_maj);
 		enharmonicChords.put("ais major", ais_maj);
+		enharmonicChords.put("cis major", cis_maj);
+		enharmonicChords.put("cis dom7", cis_dom7);
+		enharmonicChords.put("gis major", gis_maj);
 		
-		//Generate notes for every possible diminished triad 
+		enharmonicChords.put("eis dom7", eis_dom7);
+		enharmonicChords.put("fes dom7", fes_dom7);
+		enharmonicChords.put("dis dom7", dis_dom7);
+		enharmonicChords.put("gis dom7", gis_dom7);
+		enharmonicChords.put("ais dom7", ais_dom7);
+	
+		
+		/**
+		 * Generate notes for every possible diminished triad 
+		 * @return
+		 */
 		dimMap.put("c", c_dim);
 		dimMap.put("cis", cs_dim);
 		dimMap.put("des", df_dim);
@@ -219,4 +275,5 @@ public class Notes {
 	ArrayList<String> getFlatExceptions() {
 		return flatExceptions;
 	}
+
 }
