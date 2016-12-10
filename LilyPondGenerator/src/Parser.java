@@ -21,15 +21,12 @@ public class Parser {
 	HashMap<String, String []> customChordMap = new HashMap<String, String []> ();
 	int offset = 0;
 	boolean declaringNotesOnly = false;
-
-	// problem when you calculate offset is that you don't know whether to use the note in 
-	// sharps or in flats 
-
+	
 	// ensure no white, blank space around duration: d maj7,  4 was a problem
-	public Parser () throws FileNotFoundException, IOException {
+	public Parser (String file) throws FileNotFoundException, IOException {
 
 		ArrayList<String> txtFile = new ArrayList<String> ();
-		try (BufferedReader br = new BufferedReader(new FileReader("sample.txt"))) {
+		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
 			String line;
 			while ((line = br.readLine()) != null) {
 				// put all non-empty lines and non-comment lines into the String array of lines
@@ -45,21 +42,24 @@ public class Parser {
 		String secondLine = txtFile.get(1); 
 
 		/** PARSE TITLE IF THERE IS ONE **/
-
 		String title=null;
 		String composer = null;
 		String [] arr;
 
 		if (firstLine.contains("by")) {
-
+			
 			// title is the substring before the first space
-			int endOfTitle = firstLine.indexOf(" ");
-			title = firstLine.substring(0, endOfTitle);
+			int endOfTitle = firstLine.indexOf("\"", 1);
+			if (!firstLine.contains("\"") || endOfTitle==-1) {
+				System.out.println("Please surround the song title with quotation marks!");
+			}
+			
+			int beforeComposer = firstLine.indexOf("by");
+			title = firstLine.substring(0, endOfTitle+1);
 
 			// composer is substring after last space
-			int beforeComposer = firstLine.lastIndexOf(' ');
-			composer = firstLine.substring(beforeComposer+1);
-
+			composer = firstLine.substring(beforeComposer+3);
+			composer=composer.trim();
 			arr = secondLine.split(" ");
 		}
 
@@ -95,13 +95,14 @@ public class Parser {
 		/** KEY SIGNATURE **/
 		String song_root = "";
 		String song_quality="";
+		String optional_new_song_root="";
 
 		// no transpose
 		if (arr.length==5) {
 			song_root = str.convertSharpFlat(str.convertSharpFlat(arr[1].toLowerCase()));
 			song_quality = arr[2].toLowerCase().substring(0, arr[2].length()-1);
 			offset = 0;
-			np = new NoteProducer(song_clef, octave, song_root, song_quality, Integer.parseInt(arr[3]), Integer.parseInt(arr[4]), offset, title, composer);
+			np = new NoteProducer(song_clef, octave, song_root, song_quality, null, Integer.parseInt(arr[3]), Integer.parseInt(arr[4]), offset, title, composer);
 		}
 
 		// transpose
@@ -120,17 +121,19 @@ public class Parser {
 				}
 
 				// original root and quality
-				song_root = str.convertSharpFlat(str.convertSharpFlat(arr[1].toLowerCase()));
-				arr[2] = arr[2].toLowerCase();
-				song_quality = arr[2];
+				song_root = str.convertSharpFlat(arr[1].toLowerCase());
+				System.out.println("song root in parser " + song_root);
+				song_quality = convertChordQuality(arr[2]);
+				optional_new_song_root = null;
 			}
 
 			// if specifying original and new key 
 			else{
 				int oldK=0;
 				int newK=0;
-				String oldKey = arr[1];
-				String newKey = arr[4];
+				
+				String oldKey = str.convertSharpFlat(arr[1]);
+				String newKey = str.convertSharpFlat(arr[4]);
 
 				if (sharps.contains(oldKey) && sharps.contains(newKey)) {
 					oldK = sharps.indexOf(oldKey);
@@ -156,14 +159,14 @@ public class Parser {
 					offset = newK - oldK;
 				}
 
-				song_root = str.convertSharpFlat(str.convertSharpFlat(arr[4].toLowerCase()));
-				song_quality = arr[5].toLowerCase().substring(0, arr[5].length()-1); 
+				System.out.println("offset : "+offset);
+				song_root = str.convertSharpFlat(str.convertSharpFlat(arr[1].toLowerCase()));
+				song_quality = arr[2].toLowerCase().substring(0, arr[2].length()); 
+				optional_new_song_root = str.convertSharpFlat(str.convertSharpFlat(arr[4].toLowerCase()));
 			}
 
-			np = new NoteProducer(song_clef, octave, song_root, song_quality, Integer.parseInt(arr[6]), Integer.parseInt(arr[7]), offset, title, composer);
+			np = new NoteProducer(song_clef, octave, song_root, song_quality, optional_new_song_root, Integer.parseInt(arr[6]), Integer.parseInt(arr[7]), offset, title, composer);
 		}
-
-
 
 		/** parsing the remainder of the file **/
 		String currSectionName=""; // name of verse whose chords you are looking at 
@@ -177,7 +180,6 @@ public class Parser {
 			// if you're in a verse, you will either see a chord or a end bracket 
 			if (inVerse) {
 				if (line.contains("}")) {
-
 					String verseName = new String(currSectionName.trim());
 					ArrayList<String []> verseChords = new ArrayList<String[]> (currSectionChords);
 					Verse v = new Verse (verseName, verseChords);
@@ -281,7 +283,6 @@ public class Parser {
 						currSectionChords.add(constructChord);
 					}
 				}
-
 			}
 
 			// if you're in a verse you will never see {
@@ -299,7 +300,7 @@ public class Parser {
 					// if the called verse already exists, which it should
 					if (song.get(v).getName().equals(line)) {
 						String verseName = new String(song.get(v).getName());
-						System.out.println("line# and verse name: " + i + " "+ verseName);
+						//System.out.println("line# and verse name: " + i + " "+ verseName);
 						ArrayList<String []> verseChords = (song.get(v).getChords());
 						Verse calledVerse = new Verse (verseName, verseChords); 
 						song.add(calledVerse);
@@ -314,8 +315,6 @@ public class Parser {
 		}
 		returnSong();
 	}
-
-
 
 	/**
 	 * Parse chord root by converting to lower case and handling # and b 
@@ -345,7 +344,6 @@ public class Parser {
 	 */
 	public String parseInversion(String s) {
 		s = s.toLowerCase();
-		//s = convertSharpFlat(s);
 		s = str.convertSharpFlat(s); // if inversion has "#" or "b", if so, convert to "sharp" or "flat"
 		int commaLoc = s.indexOf(",");
 
@@ -354,8 +352,6 @@ public class Parser {
 		}
 		else return s;
 	}
-
-
 
 	/**
 	 * clef, key signature, and time signature of the song 
@@ -370,13 +366,13 @@ public class Parser {
 	 * @param chord_quality
 	 */
 	public String convertChordQuality (String chord_quality) {
-		if (chord_quality.equals("M") || chord_quality.equals("Major") || chord_quality.equals("maj")) {
+		if (chord_quality.equals("M") || chord_quality.equals("Major") || chord_quality.equals("maj") || chord_quality.equals("major")) {
 			chord_quality = "major";
 		}
-		else if (chord_quality.equals("m") || chord_quality.equals("Minor") || chord_quality.equals("min")) {
+		else if (chord_quality.equals("m") || chord_quality.equals("minor") || chord_quality.equals("min")) {
 			chord_quality = "minor";
 		}
-		else if (chord_quality.equals("d") || chord_quality.equals("Diminished")) {
+		else if (chord_quality.equals("d") || chord_quality.equals("dim") || chord_quality.equals("diminished")) {
 			chord_quality = "diminished";
 		}
 		else if (chord_quality.equals("D7") || chord_quality.equals("Dominant7") ||  chord_quality.equals("Dom7")) {
