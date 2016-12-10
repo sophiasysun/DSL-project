@@ -1,9 +1,18 @@
 
 public class StringManipulation {
-	
+
+
+	/**
+	 * WHY DOES THIS NOT WORK
+	 * @param note
+	 * @return
+	 */
 	String convertSharpFlat(String note){
 		if (note.length()==1) {
 			return note;
+		}
+		if (note.equals("bb")) {
+			note = "bes";
 		}
 		else if (note.contains("#")) {
 			int sharp = note.indexOf("#");
@@ -12,11 +21,12 @@ public class StringManipulation {
 		}
 		else if (note.contains("b")) {
 			int flat = note.indexOf("b");
-			if (flat>0) {
-				note = note.substring(0, flat);
-				note+="es";
+			if (flat>0){
+			note = note.substring(0, flat);
+			note+="es";
 			}
 		}
+		// in case there is double flat or sharp ????? tried replacing all # with is 
 		return note;
 	}
 }
